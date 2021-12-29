@@ -1,0 +1,13 @@
+{
+    "include": [
+        "app",
+        "core",
+    ],
+    "exclude": [
+        "logs"
+    ],
+    "reportTypeshedErrors": true,
+    "reportMissingImports": false,
+    "pythonVersion": "3.9",
+    "pythonPlatform": "Darwin"
+}
