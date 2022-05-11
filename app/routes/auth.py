@@ -1,5 +1,5 @@
 import bcrypt
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.repository.user import UserRepository
 from app.model.user import UserRegister
@@ -13,17 +13,20 @@ async def register(user: UserRegister, repository: UserRepository = Depends(User
     is_exists = await repository.is_exists(user.email)
 
     if is_exists.value:
-        return response(status_code=409, message="Email Exists")
+        raise HTTPException(409, "Email is already exists.")
+
+    if user.password != user.password_confrim:
+        raise HTTPException(409, "Password and Password Confirm must be same.")
 
     user.password = bcrypt.hashpw(user.password.encode("utf-8"), bcrypt.gensalt())
-    await repository.create(user.dict())
+    await repository.create(user)
 
-    return response(status_code=201, message="Created")
+    return response(201, "Created")
 
 
 @router.get("/{id}")
 async def get(id: int, repository: UserRepository = Depends(UserRepository)) -> Response:
     user = await repository.get(id)
     if user is None:
-        return response(status_code=404, message="Not found")
-    return response(status_code=200, message="Success", data=user)
+        raise HTTPException(404, "User not found.")
+    return response(200, "Success", user)
