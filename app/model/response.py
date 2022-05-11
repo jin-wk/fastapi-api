@@ -1,10 +1,10 @@
 from starlette.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from typing import Optional, Any
+from typing import Any
 
 
 class Response:
-    def __call__(self, status_code: int, detail: str, data: Optional[Any] = None):
+    def __call__(self, status_code: int, detail: str, data: Any | None = None):
         if data is not None:
             data = jsonable_encoder(data)
 
