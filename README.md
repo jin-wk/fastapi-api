@@ -18,3 +18,6 @@ Basic API by FastAPI with SQLAlchemy
     DB_DATABASE=
     DB_USERNAME=
     DB_PASSWORD=
+
+    JWT_SECRET=
+    JWT_EXPIRES_MIN=
