@@ -1,6 +1,6 @@
 # fastapi-database
 
-Basic API by FastAPI with SQLAlchemy
+Basic Web API Server with FastAPI
 
 ## run
 
