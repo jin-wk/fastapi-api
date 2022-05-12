@@ -1,7 +1,7 @@
 name = "fastapi-database-gunicorn"
 bind = "0.0.0.0:8000"
 workers = 1
-reload = True
+reload = False
 worker_connections = 1000 * workers
 worker_class = "uvicorn.workers.UvicornWorker"
 loglevel = "info"

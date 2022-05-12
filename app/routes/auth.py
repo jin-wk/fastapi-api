@@ -1,22 +1,18 @@
-from datetime import datetime, timedelta
+from typing import Any
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from app.dependency.jwt_bearer import decode_jwt, encode_jwt, jwt_bearer
 
 from app.repository.user import UserRepository
 from app.model.user import User, UserRegister, UserLogin
 from app.model.response import response, ResponseModel
-from app.common.config import get_config
-from jose import JWTError, jwt
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
-config = get_config()
-oauth2 = HTTPBearer(scheme_name="Authorization")
 
 
-@router.post("/register", response_model=ResponseModel)
+@router.post("/register", response_model=ResponseModel, status_code=201)
 async def register(user: UserRegister, repository: UserRepository = Depends(UserRepository)):
-    is_exists = await repository.is_exists(user.email)
+    is_exists: dict = await repository.is_exists(user.email)
 
     if is_exists.value:
         raise HTTPException(409, "Email is already exists")
@@ -29,37 +25,29 @@ async def register(user: UserRegister, repository: UserRepository = Depends(User
 
     return response(201, "Created")
 
+
 @router.post("/login", response_model=ResponseModel)
 async def login(user: UserLogin, repository: UserRepository = Depends(UserRepository)):
-    is_exists = await repository.is_exists(user.email)
+    is_exists: dict = await repository.is_exists(user.email)
 
     if not is_exists.value:
         raise HTTPException(404, "Email is not found")
 
     info: User = await repository.getByEmail(user.email)
 
-    if not bcrypt.checkpw(user.password.encode('utf-8'), info.password.encode('utf-8')):
+    if not bcrypt.checkpw(user.password.encode("utf-8"), info.password.encode("utf-8")):
         raise HTTPException(400, "Password does not matched")
 
-    payload = {
-        "id": info.id,
-        "email": info.email,
-        "exp": datetime.utcnow() + timedelta(minutes=config.JWT_EXPIRES_MIN)
-    }
-    return response(200, "Ok", {"token": jwt.encode(payload, config.JWT_SECRET, "HS256")})
+    return response(200, "Ok", {"token": encode_jwt(info)})
+
 
 @router.get("/user", response_model=ResponseModel)
-async def getUser(token: HTTPAuthorizationCredentials = Depends(oauth2), repository: UserRepository = Depends(UserRepository)):
-    try:
-        payload = jwt.decode(token.credentials, config.JWT_SECRET, "HS256")
-        id = payload.get("id")
-        if id is None:
-            raise HTTPException(401, "Not authenticated")
-    except JWTError:
-        raise HTTPException(401, "Not authenticated")
-
-    user = await repository.get(id)
-    if user is None:
-        raise HTTPException(401, "Not authenticated")
-
+async def getUser(token: str = Depends(jwt_bearer), repository: UserRepository = Depends(UserRepository)):
+    payload: Any = decode_jwt(token)
+    user: User = await repository.get(payload.get("user")["id"])
     return response(200, "Ok", user)
+
+
+@router.get("/test", response_model=ResponseModel, dependencies=[Depends(jwt_bearer)])
+async def test():
+    return response(200, "Ok")

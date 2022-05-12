@@ -1,16 +1,13 @@
 from fastapi import FastAPI
-from starlette.requests import Request
-from app.common.config import get_config
+from decouple import config
+
 from app.common.conn import conn
 from app.routes import auth
 
-get_config.cache_clear()
-config = get_config()
-
 app = FastAPI(
-    title=config.APP_NAME,
-    version=f"{config.APP_ENV} - {config.APP_VERSION}",
+    title=config("APP_NAME"),
+    version=f"{config('APP_ENV')} - {config('APP_VERSION')}",
 )
 
-conn.init_app(app, config)
+conn.init_app(app)
 app.include_router(auth.router)
