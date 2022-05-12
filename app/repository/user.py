@@ -31,3 +31,12 @@ class UserRepository:
              LIMIT 1
         """
         return await conn.database.fetch_one(query=query, values={"id": id})
+
+    async def getByEmail(self, email: str):
+        query = """
+            SELECT *
+              FROM users
+             WHERE email = :email
+             LIMIT 1
+        """
+        return await conn.database.fetch_one(query=query, values={"email": email})

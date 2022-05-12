@@ -14,6 +14,9 @@ class Config(BaseSettings):
     DB_HOST: str
     DB_PORT: str
 
+    JWT_SECRET: str
+    JWT_EXPIRES_MIN: int
+
     class Config:
         env_file = ".env"
         case_sensitive = True
