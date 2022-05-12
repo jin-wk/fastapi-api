@@ -1,4 +1,4 @@
-# fastapi-database
+# fastapi-api
 
 Basic Web API Server with FastAPI
 
