@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from decouple import config
 
 from app.common.conn import conn
-from app.routes import auth
+from app.routes import auth, board
 
 app = FastAPI(
     title=config("APP_NAME"),
@@ -11,3 +11,4 @@ app = FastAPI(
 
 conn.init_app(app)
 app.include_router(auth.router)
+app.include_router(board.router)

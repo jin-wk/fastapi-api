@@ -1,3 +1,5 @@
+from typing import Any
+
 from app.common.conn import conn
 from app.model.user import User, UserRegister
 
@@ -8,11 +10,14 @@ class UserRepository:
             INSERT INTO users (email, password, name)
                  VALUES (:email, :password, :name)
         """
-        await conn.database.execute(
-            query=query, values={"email": user.email, "password": user.password, "name": user.name}
-        )
+        values = {
+            "email": user.email,
+            "password": user.password,
+            "name": user.name,
+        }
+        await conn.database.execute(query, values)
 
-    async def is_exists(self, email: str) -> dict:
+    async def is_exists(self, email: str) -> Any:
         query = """
             SELECT EXISTS(
                 SELECT 1
@@ -21,7 +26,8 @@ class UserRepository:
                  LIMIT 1
             ) as value
         """
-        return await conn.database.fetch_one(query=query, values={"email": email})
+        values = {"email": email}
+        return await conn.database.fetch_one(query, values)
 
     async def get(self, id: int) -> User:
         query = """
@@ -30,7 +36,8 @@ class UserRepository:
              WHERE id = :id
              LIMIT 1
         """
-        return await conn.database.fetch_one(query=query, values={"id": id})
+        values = {"id": id}
+        return await conn.database.fetch_one(query, values)
 
     async def getByEmail(self, email: str) -> User:
         query = """
@@ -39,4 +46,5 @@ class UserRepository:
              WHERE email = :email
              LIMIT 1
         """
-        return await conn.database.fetch_one(query=query, values={"email": email})
+        values = {"email": email}
+        return await conn.database.fetch_one(query, values)

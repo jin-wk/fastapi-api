@@ -1,7 +1,7 @@
+from typing import Any
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from typing import Any
 
 
 class Response:

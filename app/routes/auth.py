@@ -1,20 +1,20 @@
-from typing import Any
 import bcrypt
+from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
-from app.dependency.jwt_bearer import decode_jwt, encode_jwt, jwt_bearer
 
-from app.repository.user import UserRepository
 from app.model.user import User, UserRegister, UserLogin
 from app.model.response import response, ResponseModel
+from app.repository.user import UserRepository
+from app.dependency.jwt_bearer import decode_jwt, encode_jwt, jwt_bearer
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
 
-@router.post("/register", response_model=ResponseModel, status_code=201)
+@router.post("/register", status_code=201, response_model=ResponseModel)
 async def register(user: UserRegister, repository: UserRepository = Depends(UserRepository)):
-    is_exists: dict = await repository.is_exists(user.email)
+    exists: Any = await repository.is_exists(user.email)
 
-    if is_exists.value:
+    if exists.value:
         raise HTTPException(409, "Email is already exists")
 
     if user.password != user.password_confrim:
@@ -28,9 +28,9 @@ async def register(user: UserRegister, repository: UserRepository = Depends(User
 
 @router.post("/login", response_model=ResponseModel)
 async def login(user: UserLogin, repository: UserRepository = Depends(UserRepository)):
-    is_exists: dict = await repository.is_exists(user.email)
+    exists: Any = await repository.is_exists(user.email)
 
-    if not is_exists.value:
+    if not exists.value:
         raise HTTPException(404, "Email is not found")
 
     info: User = await repository.getByEmail(user.email)
@@ -48,6 +48,6 @@ async def getUser(token: str = Depends(jwt_bearer), repository: UserRepository =
     return response(200, "Ok", user)
 
 
-@router.get("/test", response_model=ResponseModel, dependencies=[Depends(jwt_bearer)])
+@router.get("/test", dependencies=[Depends(jwt_bearer)], response_model=ResponseModel)
 async def test():
     return response(200, "Ok")
