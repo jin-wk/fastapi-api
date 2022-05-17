@@ -3,14 +3,14 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.model.user import User, UserRegister, UserLogin
-from app.model.response import response, ResponseModel
+from app.model.response import response, Response
 from app.repository.user import UserRepository
 from app.dependency.jwt_bearer import decode_jwt, encode_jwt, jwt_bearer
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
 
-@router.post("/register", status_code=201, response_model=ResponseModel)
+@router.post("/register", status_code=201, response_model=Response)
 async def register(user: UserRegister, repository: UserRepository = Depends(UserRepository)):
     exists: Any = await repository.is_exists(user.email)
 
@@ -26,7 +26,7 @@ async def register(user: UserRegister, repository: UserRepository = Depends(User
     return response(201, "Created")
 
 
-@router.post("/login", response_model=ResponseModel)
+@router.post("/login", response_model=Response)
 async def login(user: UserLogin, repository: UserRepository = Depends(UserRepository)):
     exists: Any = await repository.is_exists(user.email)
 
@@ -41,13 +41,13 @@ async def login(user: UserLogin, repository: UserRepository = Depends(UserReposi
     return response(200, "Ok", {"token": encode_jwt(info)})
 
 
-@router.get("/user", response_model=ResponseModel)
+@router.get("/user", response_model=Response)
 async def getUser(token: str = Depends(jwt_bearer), repository: UserRepository = Depends(UserRepository)):
     payload: Any = decode_jwt(token)
     user: User = await repository.get(payload.get("user")["id"])
     return response(200, "Ok", user)
 
 
-@router.get("/test", dependencies=[Depends(jwt_bearer)], response_model=ResponseModel)
+@router.get("/test", dependencies=[Depends(jwt_bearer)], response_model=Response)
 async def test():
     return response(200, "Ok")
