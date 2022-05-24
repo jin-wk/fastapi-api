@@ -46,8 +46,3 @@ async def getUser(token: str = Depends(jwt_bearer), repository: UserRepository =
     payload: Any = decode_jwt(token)
     user: User = await repository.get(payload.get("user")["id"])
     return response(200, "Ok", user)
-
-
-@router.get("/test", dependencies=[Depends(jwt_bearer)], response_model=Response)
-async def test():
-    return response(200, "Ok")
